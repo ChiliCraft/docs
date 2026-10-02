@@ -1,6 +1,6 @@
 # 架构总览
 
-本文面向开发者和 AI agent，说明 ChiliCraft 的分层结构、装配模式与数据流。实现规格全文见[《ChiliCraft·插件版技术文档（实现规格 v1.0） (1).md》](https://github.com/ChiliCraft/chilicraft/blob/main/ChiliCraft%C2%B7%E6%8F%92%E4%BB%B6%E7%89%88%E6%8A%80%E6%9C%AF%E6%96%87%E6%A1%A3%EF%BC%88%E5%AE%9E%E7%8E%B0%E8%A7%84%E6%A0%BC%20v1.0%EF%BC%89%20%281%29.md)（v1.1）。
+本文面向开发者和 AI agent，说明 ChiliCraft 的分层结构、装配模式与数据流。实现规格全文见[《ChiliCraft·插件版技术文档（实现规格 v1.1）》](<ChiliCraft·插件版技术文档（实现规格 v1.1）.md>)。
 
 ## 工程结构
 
