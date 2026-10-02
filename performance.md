@@ -53,6 +53,6 @@
 
 ## 8. 构建期红线
 
-- 工具链 / 编码 / `release=21` 由根构建脚本统一施加，附属禁止重复声明；
+- 聚合构建由根脚本统一施加工具链 / UTF-8 / `release=21`；独立子仓保留同样的配置，保证脱离父仓也能构建，不得改回 Java 17；
 - 全部依赖 `compileOnly`，附属 jar 不 shade（仅 cc-core shadowJar）；
 - `-Xlint:deprecation` 保持开启，过时 API 用法必须在注释中说明原因。

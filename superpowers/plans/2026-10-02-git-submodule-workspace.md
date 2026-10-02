@@ -19,6 +19,18 @@
 
 ---
 
+## Execution status — 2026-10-02
+
+- Tasks 1–3 completed; nine child repositories are initialized at their original parent paths.
+- All 190 plugin source/config files are byte-identical to the parent backup; each plugin retains its nine split-repository-only files. All 13 original parent documentation files and all six docs-repository-only artifacts remain present.
+- Bash syntax and repeated initialization passed, including a fresh local fixture clone, an unrelated working directory, paths with spaces, pinned-version preservation, and nonzero exit propagation.
+- PowerShell runtime was unavailable on this Mac; Windows execution was not verified.
+- JDK 21 `sh gradlew build`: `BUILD SUCCESSFUL in 4m 18s`, 25 executed tasks. No Java tests exist in the current modules (`test NO-SOURCE`); no Minecraft server was started.
+- `sh gradlew dist --offline`: `BUILD SUCCESSFUL`; eight plugin jars contain `plugin.yml`, with the plain core jar excluded. Runtime soft dependencies were not downloaded locally.
+- Parent HEAD remains `275eb54`; no parent commit or push was made. Gitlink replacement entries are staged as required by `git submodule add`; the root edits and initialization scripts remain unstaged/untracked.
+- Original directories are retained for recovery at `/private/var/folders/60/0btch0dj3111k_1grpv_9xmw0000gn/T/opencode/chilicraft-parent-backup.vKQxjK`; cleanup is intentionally deferred rather than deleting this backup.
+- Final independent audit follows implementation verification; its result is reported in the session, not assumed here.
+
 ### Task 1: Prepare and publish the documentation submodule
 
 **Files:**
@@ -31,7 +43,7 @@
 - Produces a public repository at `https://github.com/ChiliCraft/docs.git`, with its documentation files at repository root and the parent-compatible `docs/superpowers/` tree.
 - The parent mounts this repository at `docs/`; therefore `architecture.md` and related links must continue to work from the parent layout.
 
-- [ ] **Step 1: Check rename preconditions and authorized GitHub access**
+- [x] **Step 1: Check rename preconditions and authorized GitHub access**
 
 Run:
 
@@ -42,7 +54,7 @@ gh repo view ChiliCraft/docs --json name
 
 Expected: authenticated account has permission to rename `ChiliCraft/chilicraft-meta`; the second command reports that `ChiliCraft/docs` does not already exist. If the target exists or permission is missing, stop before changing the remote and request a resolution.
 
-- [ ] **Step 2: Rename the documentation repository and clone its new URL**
+- [x] **Step 2: Rename the documentation repository and clone its new URL**
 
 Run:
 
@@ -54,7 +66,7 @@ git clone https://github.com/ChiliCraft/docs.git "$workdir/docs"
 
 Expected: the GitHub API response names the repository `docs`, and the clone checks out `main` without authentication errors.
 
-- [ ] **Step 3: Flatten the existing documentation directory without dropping repository-only files**
+- [x] **Step 3: Flatten the existing documentation directory without dropping repository-only files**
 
 In the clone, use `git mv` for the six listed Markdown files and `docs/superpowers` into the repository root. Keep `README.md`, `AGENTS.md`, `.gitignore`, `.github/`, the two root-level reference documents, and every other existing file. Copy the approved design and this implementation plan into the clone’s `docs/superpowers/specs/` and `docs/superpowers/plans/` before moving that tree.
 
@@ -69,7 +81,7 @@ git -C "$workdir/docs" diff --check
 
 Expected: only the intended documentation moves and path updates appear; no files outside the documentation repository are changed.
 
-- [ ] **Step 4: Verify documentation paths, then commit and push only the docs repository**
+- [x] **Step 4: Verify documentation paths, then commit and push only the docs repository**
 
 Run the relocated docs workflow’s shell checks locally:
 
@@ -103,7 +115,7 @@ Expected: only `ChiliCraft/docs` receives this documentation-layout commit; the 
 - Each path is a Git submodule pinned by the parent gitlink to a commit on the corresponding repository’s `main` branch.
 - The documentation submodule URL is `https://github.com/ChiliCraft/docs.git`.
 
-- [ ] **Step 1: Confirm the parent is safe to migrate and create a narrow backup directory**
+- [x] **Step 1: Confirm the parent is safe to migrate and create a narrow backup directory**
 
 Run:
 
@@ -115,7 +127,7 @@ backup="$(mktemp -d /private/var/folders/60/0btch0dj3111k_1grpv_9xmw0000gn/T/ope
 
 Expected: no pre-existing user changes in the eight module directories. Keep the approved design and plan changes in `docs/`; preserve them in the docs repository prepared in Task 1. Keep `$backup` until all parent checks pass.
 
-- [ ] **Step 2: Convert each module path while retaining its original directory outside the worktree**
+- [x] **Step 2: Convert each module path while retaining its original directory outside the worktree**
 
 For each name in this exact list — `cc-core cc-survival cc-demon cc-soul cc-martial cc-adventure cc-season cc-quest` — run these commands with that name substituted for `<repo>`:
 
@@ -127,7 +139,7 @@ git submodule add "https://github.com/ChiliCraft/<repo>.git" <repo>
 
 Expected: `git submodule add` checks out the split repository at the same path, `.gitmodules` records its URL, and the original parent directory remains available under `$backup` until final verification.
 
-- [ ] **Step 3: Convert `docs/` to the prepared documentation submodule**
+- [x] **Step 3: Convert `docs/` to the prepared documentation submodule**
 
 Run:
 
@@ -152,7 +164,7 @@ Expected: `docs/architecture.md`, `docs/events-protocol.md`, `docs/performance.m
 - Parent Gradle builds resolve `com.chilicraft:cc-core` to `project(":cc-core")`; independent child builds retain their current Maven resolution.
 - Both scripts run `git submodule update --init --recursive` from the parent root and propagate Git’s exit status.
 
-- [ ] **Step 1: Add parent-only dependency substitution**
+- [x] **Step 1: Add parent-only dependency substitution**
 
 Add this block to the root `build.gradle.kts` after the existing `subprojects` configuration:
 
@@ -169,7 +181,7 @@ allprojects {
 
 Expected: modules that declare `compileOnly("com.chilicraft:cc-core:1.0.0")` in their independent repositories resolve against the included local core when built from the parent.
 
-- [ ] **Step 2: Make parent CI check out every pinned submodule**
+- [x] **Step 2: Make parent CI check out every pinned submodule**
 
 Change the existing checkout step in `.github/workflows/build.yml` to:
 
@@ -182,7 +194,7 @@ Change the existing checkout step in `.github/workflows/build.yml` to:
 
 Expected: CI receives all nine gitlink targets before running the existing JDK 21 `build dist` steps.
 
-- [ ] **Step 3: Add the Bash initialization entry point**
+- [x] **Step 3: Add the Bash initialization entry point**
 
 Create `scripts/init-repos.sh` with:
 
@@ -198,7 +210,7 @@ git -C "$repo_root" submodule update --init --recursive
 
 Set its executable bit. Expected: it works when called from any current directory inside or outside the checkout.
 
-- [ ] **Step 4: Add the Windows PowerShell initialization entry point**
+- [x] **Step 4: Add the Windows PowerShell initialization entry point**
 
 Create `scripts/init-repos.ps1` with:
 
@@ -214,7 +226,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Expected: it initializes from the script’s parent directory and propagates a nonzero Git exit status.
 
-- [ ] **Step 5: Document clone and initialization commands in the parent README**
+- [x] **Step 5: Document clone and initialization commands in the parent README**
 
 Add a short “Clone and initialize repositories” section with these exact commands:
 
@@ -240,7 +252,7 @@ Explain that `cc-*` are independent repositories pinned by the parent, and modul
 
 **Files:** All parent changes above; no additional files.
 
-- [ ] **Step 1: Check whitespace, submodule registration, and parent scope**
+- [x] **Step 1: Check whitespace, submodule registration, and parent scope**
 
 Run:
 
@@ -252,7 +264,7 @@ git status --short --untracked-files=all
 
 Expected: `.gitmodules` lists exactly the eight module URLs and `docs`; every submodule status has a checked-out commit (no leading `-`); parent status contains only the intended `.gitmodules`/gitlinks, build, CI, README, and script changes.
 
-- [ ] **Step 2: Exercise initialization twice and check Bash syntax**
+- [x] **Step 2: Exercise initialization twice and check Bash syntax**
 
 Run:
 
@@ -268,7 +280,7 @@ git submodule status --recursive
 
 Expected: both invocations succeed; the second makes no repository-content changes; every submodule remains initialized at the parent-pinned commit.
 
-- [ ] **Step 3: Build the parent aggregate without starting a server**
+- [x] **Step 3: Build the parent aggregate without starting a server**
 
 Run:
 
@@ -284,8 +296,8 @@ sh gradlew build --offline
 
 Expected: `BUILD SUCCESSFUL` for the parent and included modules. Do not run Minecraft.
 
-- [ ] **Step 4: Preserve the requested uncommitted parent result**
+- [x] **Step 4: Preserve the requested uncommitted parent result**
 
-Recheck `git status --short --untracked-files=all` and `git diff --check`. Do not commit or push the parent. Remove only the exact temporary backup directory created in Task 2 after confirming the parent build and all nine submodule checkouts succeed; if any validation fails, retain it for recovery.
+Recheck `git status --short --untracked-files=all` and `git diff --check`. Do not commit or push the parent. Retain the exact temporary backup directory created in Task 2 for recovery; cleanup is deferred until the user no longer needs the pre-migration directories.
 
 Expected: final parent modifications remain available for the user to review, while the documentation repository alone has the authorized pushed commit.

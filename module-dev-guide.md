@@ -13,15 +13,15 @@
 3. **事件名清单**：遵循「模块名.事件名」（如 `soul.relic_gained`），见 events-protocol.md；
 4. **配置键草案**：数值段 + `messages` 段，全部可热载。
 
-## Step 1：挂入多工程构建
+## Step 1：建立独立子仓并挂入聚合构建
 
-[settings.gradle.kts](settings.gradle.kts) 追加一行：
+新模块先建立独立 `ChiliCraft/cc-<name>` 仓库，以现有附属的 Gradle Wrapper、`settings.gradle.kts`、`gradle.properties`、CI 和 README 为模板。仓库建立后在聚合仓同名路径登记 Git 子模块，并在聚合仓 [settings.gradle.kts](https://github.com/ChiliCraft/chilicraft/blob/main/settings.gradle.kts) 追加 include（以下 `cc-street` 仅为规划模块示例，不表示已经建仓）：
 
 ```kotlin
 include("cc-street")
 ```
 
-新建 `cc-<name>/build.gradle.kts`（以 [cc-demon/build.gradle.kts](cc-demon/build.gradle.kts) 为模板，全部依赖 `compileOnly`，普通 jar 即最终构件）：
+新建子仓根目录 `build.gradle.kts`（以 [cc-survival/build.gradle.kts](https://github.com/ChiliCraft/cc-survival/blob/main/build.gradle.kts) 为模板，全部依赖 `compileOnly`，普通 jar 即最终构件）：
 
 ```kotlin
 // cc-<name>：<一句话职责>
@@ -29,9 +29,39 @@ plugins {
     id("java-library")
 }
 
+group = "com.chilicraft"
+version = "1.0.0"
+
+// 独立构建也使用 Java 21，避免中文 Windows 的 JDK 17 argfile 编码问题。
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+tasks.withType<Javadoc>().configureEach {
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/") { name = "papermc" }
+    mavenLocal()
+    maven {
+        url = uri("https://maven.pkg.github.com/ChiliCraft/cc-core")
+        credentials {
+            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+            password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
 dependencies {
     // 核心 API：运行时由服务端上已安装的 cc-core 提供，不打进 jar
-    compileOnly(project(":cc-core"))
+    compileOnly("com.chilicraft:cc-core:1.0.0")
     // 服务端 API：运行时由服务端提供，不打进 jar
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     // 日志门面：服务端自带，不打进 jar
@@ -48,7 +78,7 @@ tasks.processResources {
 }
 ```
 
-工具链、编码、release=21 由根构建脚本统一施加，附属不要重复声明。
+独立子仓保留 Java 21、UTF-8 和 `release=21` 配置；聚合仓根脚本施加相同约定，并把 `com.chilicraft:cc-core` 替换为本地 `:cc-core`。独立构建需先在核心仓执行 `sh gradlew publishToMavenLocal`，或按模块 README 配置 GitHub Packages 访问；聚合构建不需要预发布核心。子仓和文档提交推送后，再更新父仓的 gitlink。
 
 ## Step 2：plugin.yml
 
@@ -196,8 +226,8 @@ public final class ChiliStreetPlugin extends JavaPlugin {
 以下范式由 cc-adventure 沉淀，非五件套必需，内容体量或外部集成达到相当规模时采用：
 
 1. **内容文件与 config 分离**：条目型内容（地城 ×10、Boss ×5）拆为独立 YAML（`dungeons.yml` / `bosses.yml`），onEnable 用「缺失才释放资源」的方式落盘，由独立解析类（`DungeonContent` / `BossContent`）读成定义对象；config.yml 只留数值与 `messages` 段。内容文件同样经 `core.reload` 热载（重读文件 + 重建定义缓存）。
-2. **消息键含点号的加载**：消息键形如 `expedition.start` 时，Bukkit 配置以 `.` 为路径分隔符，`getKeys(false)` + `getString(key)` 永远取不到值（静默全空）。范式：`getKeys(true)` 遍历深键、跳过中间 `ConfigurationSection`，YAML 按嵌套结构书写，还原出的深路径恰与代码键一致（见 [AdventureSettings.java](cc-adventure/src/main/java/com/chilicraft/adventure/AdventureSettings.java)）。键名无点号（如 cc-martial 的连字符键）不受此坑影响。
-3. **可选第三方插件集成**：plugin.yml 声明 `softdepend`（如 MythicMobs），构建侧 `compileOnly(files("libs/<jar>"))`，运行侧独立适配器封装全部外部调用，每次调用 `catch (Throwable)` 降级到原版实现路径——外部插件缺失、版本不符、内部异常均不影响本模块核心玩法（见 [MythicAdapter.java](cc-adventure/src/main/java/com/chilicraft/adventure/MythicAdapter.java)）。
+2. **消息键含点号的加载**：消息键形如 `expedition.start` 时，Bukkit 配置以 `.` 为路径分隔符，`getKeys(false)` + `getString(key)` 永远取不到值（静默全空）。范式：`getKeys(true)` 遍历深键、跳过中间 `ConfigurationSection`，YAML 按嵌套结构书写，还原出的深路径恰与代码键一致（见 [AdventureSettings.java](https://github.com/ChiliCraft/cc-adventure/blob/main/src/main/java/com/chilicraft/adventure/AdventureSettings.java)）。键名无点号（如 cc-martial 的连字符键）不受此坑影响。
+3. **可选第三方插件集成**：plugin.yml 声明 `softdepend`（如 MythicMobs），构建侧使用官方 Maven 坐标并声明 `compileOnly`，不引用本地 jar 或 `test-server/`；运行侧独立适配器封装全部外部调用，每次调用 `catch (Throwable)` 降级到原版实现路径——外部插件缺失、版本不符、内部异常均不影响本模块核心玩法（见 [MythicAdapter.java](https://github.com/ChiliCraft/cc-adventure/blob/main/src/main/java/com/chilicraft/adventure/MythicAdapter.java)）。
 4. **附属箱子 GUI**：复用 cc-core 的 `GuiHolder`/`GuiListener`（cc-core 已全局注册，`instanceof GuiHolder` 识别并统一取消点击），附属直接 `new GuiHolder(...)`，**零监听器、零 plugin.yml 变更**。范式（见 cc-adventure `AdventureGui` 等 6 类、cc-martial `MartialGui` 等 5 类、cc-soul `SoulGui` 等 3 类、cc-demon `DemonGui` 等 3 类）：快照式构建——每次打开全新构建面板，点击动作成功后重建刷新；面板类与服务同包（服务多为包私有）；文案走 `messageOr(key, def)` 兜底——按钮名/lore 不可空白，config `messages` 的 gui 键段为权威文案源，代码 def 仅作保险丝且与 config 默认值保持一致；**gui 文案键命名跟随模块 Settings 的消息加载深度**——深键模块按嵌套小节书写（cc-adventure `messages.gui.*`），浅键加载（`getKeys(false)`）模块必须平铺 kebab-case（cc-martial `gui-title-main` 风格，嵌套小节浅加载读不到）；数据文件（dungeons.yml 等）串的 displayName 按纯文本展示（`Component.text`，与服务层广播 `Placeholder.unparsed` 同口径），模板占位符先 `Texts.parse` 再 `replaceText(matchLiteral)` 替换（占位符命名避开 MiniMessage 标准标签）；玩家头仅对在线玩家 `setOwningPlayer`（离线拉档案会卡主线程）。
 
 ## Step 5：验证
@@ -208,7 +238,7 @@ public final class ChiliStreetPlugin extends JavaPlugin {
 
 ## 自检清单
 
-- [ ] settings.gradle.kts 已 include；`gradlew build` 通过
+- [ ] 独立模块仓已登记为同名子模块；聚合仓 settings.gradle.kts 已 include；`gradlew build` 通过
 - [ ] plugin.yml：`depend: [cc-core]`、`compatible-core: ">=1.0"`，无对其他附属的依赖声明
 - [ ] onEnable：API 取不到时自禁用；`registerModuleConfig` 包 IllegalStateException
 - [ ] 全部 subscribe 在 onDisable 有对应 unsubscribe；周期任务 cancel
