@@ -1,0 +1,22 @@
+name: Docs
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: 检查关键文档在位
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 校验文档
+        run: |
+          set -euo pipefail
+          for f in README.md AGENTS.md docs/architecture.md docs/events-protocol.md \
+                   docs/performance.md docs/module-dev-guide.md; do
+            test -f "$f" || { echo "缺少 $f"; exit 1; }
+          done
+          echo "文档齐全"
