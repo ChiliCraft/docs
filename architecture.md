@@ -1,10 +1,10 @@
 # 架构总览
 
-本文面向开发者和 AI agent，说明 ChiliCraft 的分层结构、装配模式与数据流。实现规格全文见根目录《ChiliCraft·插件版技术文档（实现规格 v1.0） (1).md》（v1.1）。
+本文面向开发者和 AI agent，说明 ChiliCraft 的分层结构、装配模式与数据流。实现规格全文见[《ChiliCraft·插件版技术文档（实现规格 v1.0） (1).md》](https://github.com/ChiliCraft/chilicraft/blob/main/ChiliCraft%C2%B7%E6%8F%92%E4%BB%B6%E7%89%88%E6%8A%80%E6%9C%AF%E6%96%87%E6%A1%A3%EF%BC%88%E5%AE%9E%E7%8E%B0%E8%A7%84%E6%A0%BC%20v1.0%EF%BC%89%20%281%29.md)（v1.1）。
 
 ## 工程结构
 
-Gradle 多工程（[settings.gradle.kts](settings.gradle.kts)），根 [build.gradle.kts](build.gradle.kts) 统一约定：
+聚合仓 [`ChiliCraft/chilicraft`](https://github.com/ChiliCraft/chilicraft) 以 [settings.gradle.kts](https://github.com/ChiliCraft/chilicraft/blob/main/settings.gradle.kts) 装配 Gradle 多工程，并由根 [build.gradle.kts](https://github.com/ChiliCraft/chilicraft/blob/main/build.gradle.kts) 统一约定：
 
 - Java 21 工具链编译，`options.release = 21`（目标字节码 21，目标服务端为 Paper 1.21.1）
 - 全部源码 `UTF-8`；`-Xlint:deprecation` 暴露过时 API 用法
@@ -12,16 +12,17 @@ Gradle 多工程（[settings.gradle.kts](settings.gradle.kts)），根 [build.gr
 - 版本统一 `com.chilicraft:1.0.0`
 
 ```
-chilicraft/
-├── cc-core/        # 核心（契约 + 实现 + DB + 命令 + GUI）
-├── cc-survival/    # 附属：生存压力
-├── cc-demon/       # 附属：饿魔（含 /demon 箱子 GUI）
-├── cc-soul/        # 附属：灵魂与遗物（含 /soul 箱子 GUI）
-├── cc-martial/     # 附属：武学竞技场（含 /martial 箱子 GUI）
-├── cc-adventure   # 附属：地城、远征与世界 Boss（含 /adventure 箱子 GUI）
-├── cc-season      # 附属：季节日历、天气与生态
-├── cc-quest       # 附属：任务章节、事件推进与旅途手册
-└── cc-street      # 规划中：方街（见规格 v1.1）
+ChiliCraft/chilicraft/   # 聚合仓（Gradle 构建、CI 与发行包）
+├── cc-core/             # 子模块仓：核心（契约 + 实现 + DB + 命令 + GUI）
+├── cc-survival/         # 子模块仓：生存压力
+├── cc-demon/            # 子模块仓：饿魔（含 /demon 箱子 GUI）
+├── cc-soul/             # 子模块仓：灵魂与遗物（含 /soul 箱子 GUI）
+├── cc-martial/          # 子模块仓：武学竞技场（含 /martial 箱子 GUI）
+├── cc-adventure/        # 子模块仓：地城、远征与世界 Boss
+├── cc-season/           # 子模块仓：季节日历、天气与生态
+├── cc-quest/            # 子模块仓：任务章节、事件推进与旅途手册
+├── docs/                # 本仓 ChiliCraft/docs 的子模块挂载点
+└── cc-street/           # 规划中：方街（尚无独立仓库，见规格 v1.1）
 ```
 
 ## 三层结构

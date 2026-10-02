@@ -8,7 +8,7 @@ ChiliCraft 跨模块协作的唯一通道：字符串事件名 + `EventData` 载
 
 事件名 = `发布方模块名.事件名`（蛇形小写）：`demon.mob_killed`、`street.world_enter`。核心专属事件用 `core.` 前缀。
 
-### EventData 载体（[EventData.java](<../cc-core/src/main/java/com/chilicraft/api/EventData.java>)）
+### EventData 载体（[EventData.java](https://github.com/ChiliCraft/cc-core/blob/main/src/main/java/com/chilicraft/api/EventData.java)）
 
 | 字段 | 类型 | 约定 |
 |---|---|---|

@@ -15,8 +15,8 @@ jobs:
       - name: 校验文档
         run: |
           set -euo pipefail
-          for f in README.md AGENTS.md docs/architecture.md docs/events-protocol.md \
-                   docs/performance.md docs/module-dev-guide.md; do
+          for f in README.md AGENTS.md architecture.md events-protocol.md \
+                   performance.md module-dev-guide.md; do
             test -f "$f" || { echo "缺少 $f"; exit 1; }
           done
           echo "文档齐全"

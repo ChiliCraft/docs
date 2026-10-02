@@ -10,7 +10,8 @@ ChiliCraft：ChiliChill 2026 巡演「混入人类计划 II：方街」主题的
 
 原 monorepo 已拆分为独立仓库（清单见 [README.md](README.md) 仓库结构表）：
 
-- **本仓 chilicraft-meta**：文档、架构、事件协议、规范——跨模块资料只在这里维护
+- **本仓 ChiliCraft/docs**：文档、架构、事件协议、规范——跨模块资料只在这里维护；在聚合仓中作为 `docs/` 子模块
+- **聚合仓 `ChiliCraft/chilicraft`**：根 Gradle 工程、统一 CI 和部署包汇总；以 Git 子模块固定八个插件仓及本文档仓的提交
 - **各模块仓**（cc-core、cc-*）：各自独立 Gradle 工程、独立 CI（构建并上传自己的 jar）、独立 git 历史
 - 模块仓以 `compileOnly("com.chilicraft:cc-core:1.0.0")` 引核心 API（GitHub Packages，或本地 `publishToMavenLocal` 后走 `mavenLocal()`）；第三方联动全部 `compileOnly` 正规 Maven 坐标，**禁止**引入本地 jar 文件或 `test-server/` 方式
 - 本文件是全项目群的 agent 指引；进入具体模块仓工作时以该仓 README / build.gradle.kts 为准
@@ -18,14 +19,14 @@ ChiliCraft：ChiliChill 2026 巡演「混入人类计划 II：方街」主题的
 ## 必读顺序
 
 1. [README.md](README.md) —— 项目与模块总览、巡演联动点
-2. [docs/architecture.md](docs/architecture.md) —— 分层与装配模式
-3. [docs/events-protocol.md](docs/events-protocol.md) —— 事件契约与全量清单
-4. [docs/performance.md](docs/performance.md) —— 性能红线（验收口径）
-5. 改附属模块前：对照 [docs/module-dev-guide.md](docs/module-dev-guide.md) 的范式与自检清单
+2. [architecture.md](architecture.md) —— 分层与装配模式
+3. [events-protocol.md](events-protocol.md) —— 事件契约与全量清单
+4. [performance.md](performance.md) —— 性能红线（验收口径）
+5. 改附属模块前：对照 [module-dev-guide.md](module-dev-guide.md) 的范式与自检清单
 
 ## 构建与验收
 
-在**具体模块仓**内执行（本文档仓无构建）：
+在**具体模块仓**内执行；完整多模块验收在聚合仓根目录执行（本文档仓本身无插件构建）：
 
 ```bash
 # 附属仓：先确保 cc-core 可解析（本地开发在 cc-core 仓执行 ./gradlew publishToMavenLocal）
@@ -33,6 +34,9 @@ ChiliCraft：ChiliChill 2026 巡演「混入人类计划 II：方街」主题的
 
 # 依赖已缓存时的兜底（SNAPSHOT 元数据刷新失败 / TLS 握手失败时用这个）
 ./gradlew build --offline
+
+# 聚合仓：由本地 :cc-core 工程替换 Maven 坐标，构建全部插件并汇总发行包
+sh gradlew build dist
 ```
 
 - 环境：JDK 21 工具链（缺失由 Foojay 自动下载），编译目标 Java 21 字节码
@@ -50,7 +54,7 @@ ChiliCraft：ChiliChill 2026 巡演「混入人类计划 II：方街」主题的
 ## 改动边界
 
 1. **cc-core 默认零改动**。新玩法 = 新附属模块；跨模块协作 = 事件总线
-2. **新事件先登记后编码**：先在 [docs/events-protocol.md](docs/events-protocol.md) 加行，再写代码。订阅尚未实现的事件是合法且常态
+2. **新事件先登记后编码**：先在 [events-protocol.md](events-protocol.md) 加行，再写代码。订阅尚未实现的事件是合法且常态
 3. 改现有模块时保持既有范式（见下），不做顺手重构
 4. 巡演主题联动改动优先复用「配置名单 + 事件订阅」模式，模板缺失时静默跳过
 
@@ -79,12 +83,12 @@ ChiliCraft：ChiliChill 2026 巡演「混入人类计划 II：方街」主题的
 
 | 改动类型 | 必须同步的资料 |
 |---|---|
-| 新建子插件 | 新建独立模块仓（抄任一现成仓的构建/CI/README 骨架）+ [README.md](README.md) 仓库结构表与模块总览、[architecture.md](docs/architecture.md) 工程结构、[events-protocol.md](docs/events-protocol.md)（有新事件先登记）、沉淀出新范式时更新 [module-dev-guide.md](docs/module-dev-guide.md) |
-| 新增 / 变更事件 | [events-protocol.md](docs/events-protocol.md) 清单（先登记后编码，含字段约定与订阅方行为） |
+| 新建子插件 | 新建独立模块仓（抄任一现成仓的构建/CI/README 骨架）+ [README.md](README.md) 仓库结构表与模块总览、[architecture.md](architecture.md) 工程结构、[events-protocol.md](events-protocol.md)（有新事件先登记）、沉淀出新范式时更新 [module-dev-guide.md](module-dev-guide.md) |
+| 新增 / 变更事件 | [events-protocol.md](events-protocol.md) 清单（先登记后编码，含字段约定与订阅方行为） |
 | 改动巡演联动点 / 名单机制 | [README.md](README.md) 巡演联动一览、模块 config.yml 注释与默认值 |
-| 改动周期任务 / 性能相关行为 | [performance.md](docs/performance.md) 周期表与红线口径 |
+| 改动周期任务 / 性能相关行为 | [performance.md](performance.md) 周期表与红线口径 |
 | 调数值 / 文案 | 模块 config.yml 内注释保持与行为一致（无结构变化不必动 docs） |
-| 改动装配范式 / API 契约 | [architecture.md](docs/architecture.md)、[module-dev-guide.md](docs/module-dev-guide.md) 对应范式段落 |
+| 改动装配范式 / API 契约 | [architecture.md](architecture.md)、[module-dev-guide.md](module-dev-guide.md) 对应范式段落 |
 
 更新原则：只改受影响的小节，不做顺手重写；文档描述必须与代码实际行为一致，宁可写「规划中 / 未实现」也不留过期描述。
 

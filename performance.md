@@ -4,7 +4,7 @@
 
 ## 1. 周期任务驱动，禁止高频事件监听
 
-温度、负重、刷怪等持续状态一律由**低频周期任务**驱动，禁止监听 `PlayerMoveEvent`、背包变化等高频 Bukkit 事件做重算（[PressureTask.java](<../cc-survival/src/main/java/com/chilicraft/survival/PressureTask.java>) 类注释为原始出处）。
+温度、负重、刷怪等持续状态一律由**低频周期任务**驱动，禁止监听 `PlayerMoveEvent`、背包变化等高频 Bukkit 事件做重算（[PressureTask.java](https://github.com/ChiliCraft/cc-survival/blob/main/src/main/java/com/chilicraft/survival/PressureTask.java) 类注释为原始出处）。
 
 现网周期表：
 
