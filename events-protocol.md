@@ -56,7 +56,7 @@ api.unsubscribe("street.world_enter", streetHandler);
 | `core.mode_switched` | cc-core | 玩家 | 新模式名（`adventure`/`cozy`） | 0 | 模式切换成功；extra `from` = 旧模式名 |
 | `demon.hunger_triggered` | cc-demon | 玩家 | `hunger` | 当前饱食度 | 饿意 false→true 转换（入饿意名单瞬间） |
 | `demon.mob_killed` | cc-demon | 击杀者 | 实体类型 ID | 1 | 玩家击杀饿魔（灵魂掉落记账源） |
-| `soul.player_died` | cc-soul | 死者 | 死因名 | 灵魂损失量 | 玩家死亡（灵魂扣减与播报完成） |
+| `soul.player_died` | cc-soul | 死者 | 死因名 | 灵魂损失量 | 玩家死亡（灵魂扣减与播报完成）；cc-adventure 订阅：清理该玩家名下世界 Boss 的召唤物（Boss 本体保留），并刷新能力值的「上次死亡时间」 |
 | `soul.relic_gained` | cc-soul | 玩家 | 遗物 ID | 1 | 获得遗物 |
 | `soul.relic_funeral` | cc-soul | 玩家 | 遗物 ID | 1 | 遗物葬礼完成（旧眼镜祭品可缩短仪式） |
 | `martial.arena_win` | cc-martial | 冠军 | `arena` | 1 | 竞技场夺冠（含败者安慰礼与「演」演出之后） |
