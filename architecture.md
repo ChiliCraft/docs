@@ -38,7 +38,7 @@ ChiliCraft/chilicraft/   # 聚合仓（Gradle 构建、CI 与发行包）
 | `ModuleCommandRoute` / `ModuleCommandExecutor` / `ModuleTabCompleter` | `/cc <module>` 路由、执行和 Tab 补全契约 |
 | `EventData` / `EventHandler` | 事件载体与回调契约 |
 | `ParamKey` | 跨模块参数键（HUNGER_DECAY、WEIGHT_LIMIT 等 5 键） |
-| `GameMode` / `PlayerProfile` | 全局模式枚举与档案只读视图（含 `createdAt()` 建档时间，供 cc-adventure 能力值算账号年龄） |
+| `GameMode` / `PlayerProfile` | 全局模式枚举与档案只读视图（含 `createdAt()` 建档时间，数据源已就绪；cc-adventure 概率模型当前仅用攻击/防御两项） |
 | `ModuleConfig` / `HomeZone` / `RowStore` | 附属配置、家园区、受限行级存储契约 |
 
 ### 2. 实现层 `com.chilicraft.core.*`（cc-core）

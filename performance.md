@@ -12,7 +12,7 @@
 |---|---|---|
 | cc-survival 压力循环 | 1 秒（20L, 20L） | 负重效果 / 体温步进与失温伤害 / 饥饿耗竭 / HUD |
 | cc-demon 刷怪循环 | 2 秒（40L, 40L） | 饿意名单维护 / 刷怪 / 索敌 |
-| cc-adventure 冒险循环 | 1 秒（20L, 20L）；Boss 触发巡检按 `boss.check-seconds`（默认 3 秒 = 60 ticks） | 地城 / 远征推进、BossBar 更新；Boss 触发与技能按配置间隔执行。触发巡检内逐玩家算一次能力值快照（背包扫描 + 属性读取）供本轮全部 Boss 复用，DB 战绩/死亡时间走 `CapabilityService` 异步缓存，主线程只读 |
+| cc-adventure 冒险循环 | 1 秒（20L, 20L）；Boss 触发巡检按 `boss.check-seconds`（默认 3 秒 = 60 ticks） | 地城 / 远征推进、BossBar 更新；Boss 触发与技能按配置间隔执行。触发巡检逐 Boss 调 `BossProbability.evaluate`（背包 36 格取最强武器攻击 + 读盔甲值，两项钟形相乘，纯内存无 DB），分项与 `/adventure boss debug` 同源 |
 | cc-core 档案自动保存 | `auto-save.interval-seconds`（下限 5 秒，防误配打爆调度器） | 档案落库 |
 | cc-season 主循环 | 1 秒（20L, 20L） | 日历推进、HUD、低频天气检查 |
 | cc-season 动物迁徙 | `migration.period-seconds`（默认 300 秒） | 主线程扫描配置世界出生点半径内名单动物，单轮最多 `max-entities` 个，安全水平位移并逐实体异常隔离 |
